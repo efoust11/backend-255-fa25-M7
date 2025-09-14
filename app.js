@@ -1,21 +1,38 @@
 //setup
 const express = require("express");
+var cors = require("cors");
 //activate or tell this app variable to be an express server
 const app = express();
+app.use(cors());
 const router = express.Router();
 
-//start the web server
-app.listen(3000, function(){
-    console.log("listening on port 3000");
-});
+
 
 //making an api using routes
 
 //GET or a regular request when someone goes to http://localhost:3000/hello
-// app.get("/hello", function(req,res){
-//     res.send("<h1>Hello Express</h1>");
-// });
 
-// app.get("/goodbye", function(req,res){
-//     res.send("<h1>Goodbye, Express!</h1>");
-// });
+
+router.get("/songs", function(req,res){
+    const song = [
+        {
+            title: "We Found Love",
+            artist: "Rihanna",
+            popularity: 10,
+            releaseDate: new Date(2011, 9, 22),
+            genre: ["electro house"]
+        },
+        {
+            title:"Happy",
+            artist:"Pharrell Williams",
+            popularity:10,
+            releaseDate: new Date(2019, 11, 21),
+            genre: ["soul", "new soul"]
+        }
+    ];
+    res.json(song);
+});
+
+app.use("/api", router);
+app.listen(3000);
+
