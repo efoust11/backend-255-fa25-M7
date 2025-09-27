@@ -1,38 +1,39 @@
-//setup
 const express = require("express");
-var cors = require("cors");
-//activate or tell this app variable to be an express server
+const Song = require("./models/song");
+var cors = require('cors')
+
 const app = express();
 app.use(cors());
+
+// Middleware that parses HTTP requests with JSON body
+app.use(express.json());
+
 const router = express.Router();
 
+// Get list of all songs in the database
+router.get("/songs", async function(req, res) {
+   try {
+      const songs = await Song.find();
+      res.json(songs);
+   }
+   catch (ex) {
+      res.status(400).send(ex.message);
+   }
+});
 
-
-//making an api using routes
-
-//GET or a regular request when someone goes to http://localhost:3000/hello
-
-
-router.get("/songs", function(req,res){
-    const song = [
-        {
-            title: "We Found Love",
-            artist: "Rihanna",
-            popularity: 10,
-            releaseDate: new Date(2011, 9, 22),
-            genre: ["electro house"]
-        },
-        {
-            title:"Happy",
-            artist:"Pharrell Williams",
-            popularity:10,
-            releaseDate: new Date(2019, 11, 21),
-            genre: ["soul", "new soul"]
-        }
-    ];
-    res.json(song);
+// Add a new song to the database
+router.post("/songs", async(req, res) => {
+   try {
+      const song = await new Song(req.body);
+      await song.save();
+      res.status(201).json(song);
+      console.log(song);
+   }
+   catch (ex) {
+      res.status(400).send(ex.message);
+   }
 });
 
 app.use("/api", router);
-app.listen(3000);
 
+app.listen(3000);
