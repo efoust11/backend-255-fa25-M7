@@ -21,6 +21,17 @@ router.get("/songs", async function(req, res) {
    }
 });
 
+//Grab a single song
+router.get("/songs/:id", async (req,res) => {
+   try{
+      const song = await Song.findById(req.params.id)
+      res.json(song)
+   }
+   catch(err){
+      res.status(400).send(err)
+   }
+})
+
 // Add a new song to the database
 router.post("/songs", async(req, res) => {
    try {
@@ -33,6 +44,21 @@ router.post("/songs", async(req, res) => {
       res.status(400).send(ex.message);
    }
 });
+
+//update an existing record, uses a put request
+router.put("/songs/:id", async(req,res) => {
+   //grab song by id
+   try{
+      const song = req.body
+      await Song.updateOne({_id : req.params.id}, song)
+      console.log(song)
+      res.sendStatus(204)
+   }
+   catch(err){
+      res.status(400).send(err)
+   }
+})
+
 
 app.use("/api", router);
 
