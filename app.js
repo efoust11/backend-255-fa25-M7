@@ -25,12 +25,71 @@ router.post("/user", async(req,res) => {
       password: req.body.password,
       status: req.body.status
    })
+
+   console.log(newUser)
    try{
-      await newUser.save
+      await newUser.save()
       res.sendStatus(201)
    }
    catch(err){
       res.status(400).send(err)
+   }
+})
+
+//authenticate
+router.post("/auth", async(req,res) => {
+   if(!req.body.username || ! req.body.password){
+      res.status(400).json({error: "Missing username or password"})
+      return
+   }
+   //try to find username in database
+   console.log(req.body.username)
+   let user = await User.findOne({username : req.body.username})
+   console.log(user)
+      
+   //connection
+   if(!user){
+         res.status(401).json({error:"Bad Username"})
+      }
+      //check to see if user's password matches
+      else{
+         if(user.password != req.body.password){
+            res.status(401).json({error:"Bad Password"})
+         }
+         else{
+            //create token
+            username2 = user.username
+            const token = jwt.encode({username: user.username}, secret)
+            const auth = 1
+
+            //respond with token
+            res.json({
+               username2,
+               token:token,
+               auth:auth
+            })
+         }
+      }
+   })
+
+
+//check status of user with a valid token
+
+router.get("/status", async(req,res) => {
+   if(!req.headers["x-auth"]){
+      return res.status(401).json({error: "Missing X-Auth"})
+   }
+
+   const token = req.headers["x-auth"]
+   try{
+      const decoded = jwt.decode(token, secret)
+
+      //send back username and status fields
+      let users = User.find({}, "username status")
+      res.json(users)
+   }
+   catch(ex){
+      res.status(401).json({error: "invalid jwt"})
    }
 })
 
@@ -83,7 +142,7 @@ router.put("/songs/:id", async(req,res) => {
    }
 })
 
-router.delete("/songs:id", async(req,res) => {
+router.delete("/songs/:id", async(req,res) => {
    try{
       const song = await Song.findById(req.params.id)
       console.log(song)
